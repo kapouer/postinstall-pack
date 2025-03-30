@@ -7,8 +7,6 @@ const { esbuildPluginBrowserslist } = require('esbuild-plugin-browserslist');
 const browserslist = require('browserslist');
 
 module.exports = async function (inputs, output, options = {}) {
-	const isJS = Path.extname(output) == ".js";
-
 	const resolveDir = Path.dirname(output);
 
 	const browsers = browserslist(options.browsers ?? 'defaults');
@@ -17,11 +15,6 @@ module.exports = async function (inputs, output, options = {}) {
 	const esOpts = {
 		sourcemap: true,
 		sourcesContent: false,
-		stdin: {
-			contents: null,
-			resolveDir,
-			sourcefile: Path.basename(output)
-		},
 		bundle: true,
 		outfile: output,
 		write: true,
@@ -31,40 +24,60 @@ module.exports = async function (inputs, output, options = {}) {
 		legalComments: 'none',
 		plugins: [],
 		loader: {
+			'.mjs': 'js',
 			'.js': 'js',
 			'.css': 'css'
 		}
 	};
 	if (options.cwd) esOpts.absWorkingDir = Path.resolve(options.cwd);
 
-	if (isJS) {
+	const outputExt = Path.extname(output);
+
+	if (['.js', '.mjs'].includes(outputExt)) {
 		esOpts.plugins.push(esbuildPluginBrowserslist(browsers, {
 			printUnknownTargets: false
 		}));
-		esOpts.stdin.loader = 'js';
-		esOpts.stdin.contents = inputs.map(input => {
-			if (Buffer.isBuffer(input)) {
-				return input;
-			} else if (/^https?:\/\//.test(input)) {
-				return `require("${input}");`;
-			} else {
-				return `require("${relativePath(resolveDir, input)}");`
-			}
-		}).join('\n');
+		if (inputs.length > 1) {
+			esOpts.stdin = {
+				loader: 'js',
+				contents: inputs.map(input => {
+					if (Buffer.isBuffer(input)) {
+						return input;
+					} else if (/^https?:\/\//.test(input)) {
+						return `require("${input}");`;
+					} else {
+						return `require("${relativePath(resolveDir, input)}");`
+					}
+				}).join('\n'),
+				resolveDir,
+				sourcefile: Path.basename(output)
+			};
+		} else {
+			esOpts.entryPoints = inputs;
+		}
+		if (outputExt == ".mjs") esOpts.format = "esm";
 	} else {
 		esOpts.plugins.push(copy(), http(userAgent), lightning({
 			targets: browserslistToTargets(browsers)
 		}));
-		esOpts.stdin.loader = 'css';
-		esOpts.stdin.contents = inputs.map(input => {
-			if (Buffer.isBuffer(input)) {
-				return input;
-			} else if (/^https?:\/\//.test(input)) {
-				return `@import "${input}";`;
-			} else {
-				return `@import "${relativePath(resolveDir, input)}";`;
-			}
-		}).join('\n');
+		if (inputs.length > 1) {
+			esOpts.stdin = {
+				loader: 'css',
+				contents: inputs.map(input => {
+					if (Buffer.isBuffer(input)) {
+						return input;
+					} else if (/^https?:\/\//.test(input)) {
+						return `@import "${input}";`;
+					} else {
+						return `@import "${relativePath(resolveDir, input)}";`;
+					}
+				}).join('\n'),
+				resolveDir,
+				sourcefile: Path.basename(output)
+			};
+		} else {
+			esOpts.entryPoints = inputs;
+		}
 	}
 
 	const { errors, warnings } = await build(esOpts);

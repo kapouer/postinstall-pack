@@ -4,6 +4,8 @@ This is a [postinstall](http://github.com/kapouer/postinstall) command plugin.
 
 It runs `esbuild` or `lightningcss` on inputs, and concatenate bundles on output.
 
+If the output ends with ".mjs", it switches to "esm" output.
+
 Supports Buffer, remote URL, or local paths.
 
 Bundles remote dependencies, otherwise assets are copied.

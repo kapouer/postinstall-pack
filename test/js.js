@@ -117,4 +117,16 @@ describe("js bundling", () => {
 		const result = await fs.readFile(Path.join(__dirname, output));
 		assert.ok(result.includes('toto'));
 	});
+
+	it("bundles files to esm format", async () => {
+		const inputs = ['import/esm1.mjs'];
+		const output = 'output/esm.mjs';
+		await pjs(
+			inputs,
+			output,
+			{ sourceMap: false, cwd: 'test' }
+		);
+		const result = await fs.readFile(Path.join(__dirname, output));
+		assert.ok(result.includes('That'));
+	});
 });
