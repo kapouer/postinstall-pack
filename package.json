@@ -1,6 +1,6 @@
 {
   "name": "postinstall-pack",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "postinstall to pack js or css",
   "main": "index.js",
   "scripts": {
