@@ -10,13 +10,12 @@ module.exports = async function (inputs, output, options = {}) {
 	const isJS = Path.extname(output) == ".js";
 
 	const resolveDir = Path.dirname(output);
-	const sourceMap = options.sourceMap ?? false;
 
 	const browsers = browserslist(options.browsers ?? 'defaults');
 	const userAgent = browsersToUserAgent(browsers);
 
 	const esOpts = {
-		sourcemap: sourceMap,
+		sourcemap: true,
 		sourcesContent: false,
 		stdin: {
 			contents: null,

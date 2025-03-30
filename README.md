@@ -28,15 +28,7 @@ A user-agent header matching minimum browsers version is generated for the remot
 
 ### minify
 
-Pass `minify: true` to enable minification.
-
-### sourceMap
-
-Pass `sourceMap: true` to output "*.map" source maps.
-
-Pass `sourceMap: false` to disable and allow passing Buffers in inputs.
-
-For now, css source maps might not be correct (lightning does not pass map to esbuild).
+Pass `minify: true` or `--minify=true` to enable minification.
 
 ### cwd
 

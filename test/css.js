@@ -55,7 +55,7 @@ describe("css bundling", () => {
 		]);
 		assert.ok(result.includes('/*# sourceMappingURL=sampleBoth.css.map */'));
 	});
-	it("keeps correct paths in symlinks", async () => {
+	it("resolve symlinks", async () => {
 		const inputs = [__dirname + '/css/sub.css'];
 		const output = __dirname + '/output/css/sub.css';
 		await pjs(
@@ -65,7 +65,7 @@ describe("css bundling", () => {
 		);
 		const obj = JSON.parse(await fs.readFile(__dirname + '/output/css/sub.css.map'));
 		assert.deepEqual(obj.sources, [
-			"../../css/sub.css"
+			"../../css/inner/sub.css"
 		]);
 	});
 
